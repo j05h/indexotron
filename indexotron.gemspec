@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "bin/ndxo",
+     "indexotron.gemspec",
      "lib/indexotron.rb",
      "lib/indexotron/runner.rb",
      "test/helper.rb",
