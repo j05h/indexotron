@@ -33,17 +33,23 @@ module Indexotron
 
       def start
         location = File.join NDXO_DIR, ES_VERSION
-        sys "cd #{location} && bin/elasticsearch > output 2>&1"
+        if File.exists? location
+          sys "cd #{location} && bin/elasticsearch > output 2>&1"
+          puts "Started elastic search (#{pid})"
+        else
+          puts "elastic search does not exist at #{location}.  Try 'ndxo install'"
+        end
       end
 
       def pid
-        `ps -ef | grep [e]lastic | awk '{print $2}'`.split("\n").join(" ")
+        @pid ||= `ps -ef | grep [e]lastic | awk '{print $2}'`.split("\n").join(" ")
       end
 
       def stop
         if pid.empty?
           puts "No elastic search is started"
         else
+          puts "Stopping elastic search (#{pid})"
           sys "kill -9 #{pid}"
         end
       end
@@ -62,7 +68,7 @@ Indexotron is a gem to help index and search web site.
 -------------------------------------------------------
 ndxo <command>
 Commands: 
-  * install: installs elastic search (elasticsearch.com)
+  * install: installs to NDXO_DIR or ~/indexotron (elasticsearch.com)
   * start: starts an elastic search instance
   * stop: stops all elastic search instances
   * pid: prints pids for all instances
