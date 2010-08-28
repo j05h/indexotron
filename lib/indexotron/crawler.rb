@@ -9,21 +9,20 @@ class Crawler
   class NoUrlSpecified < StandardError; end
 
   def self.start_crawling(options={})
-    new(options)
+    crawler = new(options)
+    crawler.start_crawler
+    crawler.start_fetchers
   end
 
   def initialize(options={})
     @url           = options[:url]
-    @max_depth     = options[:depth]
+    @max_depth     = options[:depth] || 1
     @mutex         = Mutex.new
     @queue         = []
     @fetcher_count = 3
 
     raise NoUrlSpecified unless @url
-    puts "We're going to crawl: #{@url} with a max depth of #{@max_depth}"
-
-    start_crawler
-    start_fetchers
+    # puts "We're going to crawl: #{@url} with a max depth of #{@max_depth}"
   end
 
   def queue
@@ -73,8 +72,24 @@ class Crawler
 
   def indexer
     return @indexer if @indexer
-    uri = URI.parse @url
-    @indxer = ElasticSearch.new('127.0.0.1:9200', :index => uri.host, :type => "docs")
+    host = URI.parse(@url).host
+    @indxer = ElasticSearch.new('127.0.0.1:9200', :index => host, :type => "docs")
+  end
+
+  def search query
+    indexer.search query
+  end
+
+  def get guid
+    indexer.get guid
+  end
+
+  def self.search site, query
+    Crawler.new(:url => site).search query
+  end
+
+  def self.get site, guid
+    Crawler.new(:url => site).get guid
   end
 
   def index url, response, page

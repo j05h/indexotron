@@ -1,4 +1,7 @@
 require 'fileutils'
+require 'tempfile'
+require File.join(File.dirname(__FILE__), 'crawler')
+
 module Indexotron
   class Runner
     NDXO_DIR = File.expand_path(ENV['NDXO_DIR'] || "~/indexotron/")
@@ -15,12 +18,36 @@ module Indexotron
           stop
         when /^pid$/
           puts pid
+        when /^index/
+          index ARGV.shift, ARGV.shift.to_i || 1
+        when /^search/
+          search( ARGV.shift, ARGV.shift )
+        when /^open/
+          open( ARGV.shift, ARGV.shift )
         else
           help
         end
       end
 
       def configure
+      end
+
+      def index url, depth = 1
+        Crawler.start_crawling :url => url, :depth => depth
+      end
+
+      def search site, query
+        puts Crawler.search( site, query ).map{ |x| "[#{x.id}]: #{x.title}" }
+      end
+
+      def open site, guid
+        # write to tmp file
+        object = Crawler.get site, guid
+        filename = "/tmp/#{guid}.html"
+        File.open filename, 'w+' do |file|
+          file.write object.page
+        end
+        `open #{filename}`
       end
 
       def install

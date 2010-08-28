@@ -1,33 +1,47 @@
 = indexotron
 
-a simple gem to help you index a website or two click to edit
+a simple gem to help you index a website or two and then search the results
 http://github.com/j05h/indexotron
 
-== features
-
-Right now, not much.
+== Features
 
 gem install indexotron
 
 ndxo <command>
 Commands: 
   * install: installs to NDXO_DIR or ~/indexotron (elasticsearch.com)
-  * start: starts an elastic search instance
-  * stop: stops all elastic search instances
-  * pid: prints pids for all instances
-  * help: prints this help
+  * start:   starts an elastic search instance
+  * stop:    stops all elastic search instances
+  * pid:     prints pids for all instances
+  * index:   index a website
+  * search:  search indexed content
+  * help:    prints this help
 
-
-ndxo install installs elastic search to your home directory or, NDXO_DIR if
+== Installation:
+'ndxo install' 
+installs elastic search to your home directory or, NDXO_DIR if
 you have that set in your environment.
 
+== Starting:
+'ndxo start'
 After you have it installed, run 'ndxo start' to start up as many instances of
 elastic search as you like.  
 
-'ndxo stop' will stop them all.
+== Stopping:
+'ndxo stop' 
+This will stop all running indexers.
 
-What's next? Probably trying to index something.  We shall see!
+== Status:
+'ndxo pid'
+Will show you which indexers are currenlty running.
 
+== Indexing:
+'ndxo index <site>'
+Will start indexing the provided website.
+
+== Searching:
+'ndxo search <site> <query>'
+Will search the given site for whatever query term you're providing.
 
 == Note on Patches/Pull Requests
  
