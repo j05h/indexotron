@@ -72,8 +72,7 @@ class Crawler
 
   def indexer
     return @indexer if @indexer
-    host = URI.parse(@url).host
-    @indxer = ElasticSearch.new('127.0.0.1:9200', :index => host, :type => "docs")
+    @indxer = ElasticSearch.new('127.0.0.1:9200', :index => base_uri.host, :type => "docs")
   end
 
   def search query
@@ -120,11 +119,14 @@ class Crawler
     puts "#{"\t"*depth}#{Thread.current.object_id} - #{message}"
   end
 
+  def base_uri
+    @uri ||= URI.parse @url
+  end
+
   def valid_url?(url)
     return false if url.nil? || url =~ /^#/ || url =~ /^javascript/
     begin
-      URI.parse(url)
-      true
+      base_uri.host.eql? URI.parse(url).host
     rescue URI::InvalidURIError
       false
     end
