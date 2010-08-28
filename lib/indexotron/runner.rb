@@ -1,5 +1,5 @@
 require 'fileutils'
-require 'tempfile'
+require 'optparse'
 require File.join(File.dirname(__FILE__), 'crawler')
 
 module Indexotron
@@ -7,9 +7,9 @@ module Indexotron
     NDXO_DIR = File.expand_path(ENV['NDXO_DIR'] || "~/indexotron/")
     ES_VERSION = "elasticsearch-0.9.0"
     class << self
-      def run(command)
-        configure
-        case(command)
+      def run()
+        options = configure
+        case(options[:command])
         when /^install$/
           install
         when /^start$/
@@ -19,17 +19,33 @@ module Indexotron
         when /^pid$/
           puts pid
         when /^index/
-          index ARGV.shift, ARGV.shift.to_i || 1
+          index options[:site], option[:argument].to_i || 1
         when /^search/
-          search( ARGV.shift, ARGV.shift )
+          search options[:site], options[:argument]
         when /^open/
-          open( ARGV.shift, ARGV.shift )
+          open options[:site], options[:argument]
         else
           help
         end
       end
 
       def configure
+        options = {:site => ENV['NDXO_SITE']}
+        OptionParser.new do |opts|
+          opts.banner = help
+
+          opts.on("-s", "--site [SITE]", String, "Site to host") do |site|
+            options[:site] = site
+          end
+
+          opts.on_tail '-h', '--help','Show this message' do
+            puts opts
+          end
+        end.parse!
+
+        options[:command]  = ARGV.shift
+        options[:argument] = ARGV.shift
+        options
       end
 
       def index url, depth = 1
@@ -90,16 +106,20 @@ module Indexotron
       end
 
       def help
-        puts <<-MSG
+        <<-MSG
 Indexotron is a gem to help index and search web site.
 -------------------------------------------------------
-ndxo <command>
+ndxo <command> [options]
 Commands: 
   * install: installs to NDXO_DIR or ~/indexotron (elasticsearch.com)
-  * start: starts an elastic search instance
-  * stop: stops all elastic search instances
-  * pid: prints pids for all instances
-  * help: prints this help
+  * start  : starts an elastic search instance
+  * stop   : stops all elastic search instances
+  * search : searches the index and outputs the results
+  * open   : opens the given guid (get from a search) in a browser (MacOS X only)
+  * pid:   : prints pids for all instances
+  * help   : prints this help
+
+  Options:
 MSG
       end
     end
