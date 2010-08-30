@@ -4,11 +4,15 @@ require File.join(File.dirname(__FILE__), 'crawler')
 
 module Indexotron
   class Runner
-    NDXO_DIR = File.expand_path(ENV['NDXO_DIR'] || "~/indexotron/")
-    ES_VERSION = "elasticsearch-0.9.0"
+    NDXO_DIR   = File.expand_path(ENV['NDXO_DIR'] || "~/indexotron/")
+    ES_VERSION = "elasticsearch-0.10.0"
     class << self
-      def run()
+      def run
         options = configure
+        execute options
+      end
+
+      def execute options
         case(options[:command])
         when /^install$/
           install
@@ -19,7 +23,7 @@ module Indexotron
         when /^pid$/
           puts pid
         when /^index/
-          index options[:site], option[:argument].to_i || 1
+          index options[:site], option[:argument] || 1
         when /^search/
           search options[:site], options[:argument]
         when /^open/
@@ -71,7 +75,6 @@ module Indexotron
         location = File.join NDXO_DIR, "#{ES_VERSION}.zip"
         download "http://github.com/downloads/elasticsearch/elasticsearch/#{ES_VERSION}.zip", location
         sys "cd #{NDXO_DIR} && unzip #{location}"
-
       end
 
       def start
@@ -80,7 +83,7 @@ module Indexotron
           sys "cd #{location} && bin/elasticsearch > output 2>&1"
           puts "Started elastic search (#{pid})"
         else
-          puts "elastic search does not exist at #{location}.  Try 'ndxo install'"
+          puts "elastic search does not exist at #{location}.  Try 'ndxo install' first."
         end
       end
 
